@@ -27,6 +27,7 @@ class W2VArgParser:
     def get_args(self, args):
         return self.p.parse_args(args)
 
+
 class W2V: 
 
     def __init__(self, config):
