@@ -1,14 +1,37 @@
 # -- Dependencies ---
 
+import sys
 import tensorflow as tf
 import numpy as np
 from nltk.tokenize import sent_tokenize, word_tokenize 
 from collections import defaultdict
+from argparse import ArgumentParser
+
+class W2VConfig:
+    
+    def __init__(self, args):
+        self.embed_size = 0
+        self.corpus_path=args.corpus_path
+        self.methods = args.model_types
 
 
-class word2vec: 
+class W2VArgParser:
+    ''' config class argument parser used for word2vec methods. '''
 
     def __init__(self):
+        self.p = ArgumentParser(description='The parameters for word2vec methods.')
+        self.p.add_argument('-i', dest='corpus_path', default='./alice.txt', type=str, help='Path to the corpus. Default: ./alice.txt')        
+        self.p.add_argument('-opt', dest='model_types',  metavar='N', type=int, nargs='+', choices={1, 2}, default={1},
+                                    help='Types of model: 1 = skip-gram model, 2 = bag of words.')
+
+    def get_args(self, args):
+        return self.p.parse_args(args)
+
+class W2V: 
+
+    def __init__(self, config):
+        self.config = config
+        
         self.settings = {}
         self.settings['n'] = 5                 # dimension of word embeddings
         self.settings['window_size'] = 2       # context window +/- center word
@@ -152,9 +175,14 @@ class word2vec:
         onehot_vec[idx] = 1
         return onehot_vec
 
-if __name__ == "__main__": 
-    w2v = word2vec()
+def main(args):
+
+    config = W2VConfig(W2VArgParser().get_args(args))
+    w2v = W2V(config)
     corpus_f = open('./alice.txt', 'r').read()
     corpus_f = corpus_f.replace("\n", " ")
     data = w2v.preprocess(corpus_f)
     w2v.train(data)
+
+if __name__ == "__main__": 
+    main(sys.argv[1:])
